@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📝 Task Manager</h1>
+            <p>Manage your tasks efficiently</p>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Total Tasks</h3>
+                <p id="totalTasks">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Pending</h3>
+                <p id="pendingTasks">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Completed</h3>
+                <p id="completedTasks">0</p>
+            </div>
+        </div>
+
+        <div class="add-task-form">
+            <h2>Add New Task</h2>
+            <form id="taskForm">
+                <div class="form-group">
+                    <input type="text" id="title" placeholder="Task title" required>
+                </div>
+                <div class="form-group">
+                    <textarea id="description" placeholder="Task description" rows="3" required></textarea>
+                </div>
+                <button type="submit">Add Task</button>
+            </form>
+        </div>
+
+        <div class="tasks-section">
+            <h2>Your Tasks</h2>
+            <div id="tasksList" class="tasks-list">
+                <div class="loading">Loading tasks...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Task</h2>
+            <form id="editForm">
+                <div class="form-group">
+                    <input type="text" id="editTitle" placeholder="Task title" required>
+                </div>
+                <div class="form-group">
+                    <textarea id="editDescription" placeholder="Task description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <select id="editStatus">
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <button type="submit">Update Task</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
