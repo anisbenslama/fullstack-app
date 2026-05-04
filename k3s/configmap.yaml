@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: taskflow-config
+  namespace: taskflow
+data:
+  DB_HOST: "database-service"
+  DB_PORT: "5432"
+  DB_NAME: "taskflow"
+  DB_USER: "postgres"
+  
