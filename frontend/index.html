@@ -1,77 +1,321 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Manager</title>
-    <link rel="stylesheet" href="style.css">
+    <title>TaskFlow - Gestion de tâches</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .add-task-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .add-task-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .tasks-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .task-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        
+        .task-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .task-card p {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-in_progress {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .task-actions select {
+            flex: 1;
+            padding: 8px;
+            font-size: 12px;
+        }
+        
+        .task-actions button {
+            background: #dc3545;
+            padding: 8px 15px;
+            font-size: 12px;
+        }
+        
+        .loading, .empty-state, .error {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            color: #666;
+        }
+        
+        .error {
+            color: #dc3545;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .notification.success {
+            background: #28a745;
+        }
+        
+        .notification.error {
+            background: #dc3545;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: white;
+            font-size: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .tasks-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tasks-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>📝 Task Manager</h1>
-            <p>Manage your tasks efficiently</p>
-        </header>
-
-        <div class="stats">
-            <div class="stat-card">
-                <h3>Total Tasks</h3>
-                <p id="totalTasks">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>Pending</h3>
-                <p id="pendingTasks">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>Completed</h3>
-                <p id="completedTasks">0</p>
-            </div>
-        </div>
-
-        <div class="add-task-form">
-            <h2>Add New Task</h2>
+        <h1>📋 TaskFlow</h1>
+        
+        <div class="add-task-section">
+            <h2>➕ Nouvelle tâche</h2>
             <form id="taskForm">
                 <div class="form-group">
-                    <input type="text" id="title" placeholder="Task title" required>
+                    <label>Titre *</label>
+                    <input type="text" name="title" id="title" required placeholder="Entrez le titre de la tâche">
                 </div>
                 <div class="form-group">
-                    <textarea id="description" placeholder="Task description" rows="3" required></textarea>
-                </div>
-                <button type="submit">Add Task</button>
-            </form>
-        </div>
-
-        <div class="tasks-section">
-            <h2>Your Tasks</h2>
-            <div id="tasksList" class="tasks-list">
-                <div class="loading">Loading tasks...</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Modal -->
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Edit Task</h2>
-            <form id="editForm">
-                <div class="form-group">
-                    <input type="text" id="editTitle" placeholder="Task title" required>
+                    <label>Description</label>
+                    <textarea name="description" id="description" placeholder="Description détaillée (optionnelle)"></textarea>
                 </div>
                 <div class="form-group">
-                    <textarea id="editDescription" placeholder="Task description" rows="3" required></textarea>
-                </div>
-                <div class="form-group">
-                    <select id="editStatus">
-                        <option value="pending">Pending</option>
-                        <option value="completed">Completed</option>
+                    <label>Statut</label>
+                    <select name="status" id="status">
+                        <option value="pending">📝 À faire</option>
+                        <option value="in_progress">🔄 En cours</option>
+                        <option value="completed">✅ Terminé</option>
                     </select>
                 </div>
-                <button type="submit">Update Task</button>
+                <button type="submit">Créer la tâche</button>
             </form>
         </div>
+        
+        <div class="tasks-header">
+            <h2>📝 Mes tâches</h2>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number" id="totalTasks">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="pendingTasks">0</div>
+                    <div class="stat-label">En attente</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="completedTasks">0</div>
+                    <div class="stat-label">Terminées</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="tasks" class="tasks-grid">
+            <div class="loading">Chargement des tâches...</div>
+        </div>
+        
+        <footer>
+            <p>API : <span id="apiUrl"></span></p>
+        </footer>
     </div>
-
-    <script src="script.js"></script>
+    
+    <script src="app.js"></script>
 </body>
 </html>

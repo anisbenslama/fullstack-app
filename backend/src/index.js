@@ -34,18 +34,33 @@ app.get('/api/tasks', async (req, res) => {
   }
 });
 
+// Get single task
+app.get('/api/tasks/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query('SELECT * FROM tasks WHERE id = $1', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
 // Create task
 app.post('/api/tasks', async (req, res) => {
   const { title, description, status = 'pending' } = req.body;
   
-  if (!title || !description) {
-    return res.status(400).json({ error: 'Title and description required' });
+  if (!title) {
+    return res.status(400).json({ error: 'Title is required' });
   }
   
   try {
     const result = await pool.query(
       'INSERT INTO tasks (title, description, status) VALUES ($1, $2, $3) RETURNING *',
-      [title, description, status]
+      [title, description || '', status]
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {
@@ -87,7 +102,7 @@ app.delete('/api/tasks/:id', async (req, res) => {
       return res.status(404).json({ error: 'Task not found' });
     }
     
-    res.json({ message: 'Task deleted' });
+    res.json({ message: 'Task deleted successfully' });
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Database error' });

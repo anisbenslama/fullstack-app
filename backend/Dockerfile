@@ -1,19 +1,26 @@
 FROM node:18-alpine
 
-# Create app directory
 WORKDIR /app
 
-# Copy package files
+# Copier les fichiers de dépendances
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Installer les dépendances
+RUN npm ci --only=production
 
-# Copy source code
-COPY src ./src
+# Copier le code source
+COPY src/ ./src/
 
-# Expose port
+# Créer un utilisateur non-root
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001 && \
+    chown -R nodejs:nodejs /app
+
+USER nodejs
+
 EXPOSE 3000
 
-# Start the app
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/health', (r) => {r.statusCode === 200 ? process.exit(0) : process.exit(1)})"
+
 CMD ["node", "src/index.js"]

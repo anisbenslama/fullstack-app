@@ -1,62 +1,66 @@
-networks:
-  frontend-net:
-    driver: bridge
-  backend-net:
-    driver: bridge
-
-volumes:
-  postgres-data:
-    driver: local
-
 services:
   database:
     image: postgres:15-alpine
     container_name: task-database
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - backend-net
     restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: taskflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5433:5432"
+    networks:
+      - taskflow-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d taskflow"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 10s
 
   backend:
     build: ./backend
     container_name: task-backend
-    ports:
-      - "3000:3000"
+    restart: unless-stopped
     environment:
-      PORT: 3000
       DB_HOST: database
       DB_PORT: 5432
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
+      DB_USER: postgres
       DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: taskflow
+      PORT: 3000
+    ports:
+      - "3000:3000"
     networks:
-      - frontend-net
-      - backend-net
+      - taskflow-network
     depends_on:
       database:
         condition: service_healthy
-    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {r.statusCode === 200 ? process.exit(0) : process.exit(1)})"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   frontend:
     build: ./frontend
     container_name: task-frontend
+    restart: unless-stopped
     ports:
       - "8081:80"
     networks:
-      - frontend-net
+      - taskflow-network
     depends_on:
-      - backend
-    restart: unless-stopped
-    
+      backend:
+        condition: service_healthy
+
+networks:
+  taskflow-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  
